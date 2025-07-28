@@ -1,0 +1,29 @@
+name: Push NuGet package
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: NuGet Login
+      uses: Lanaparezanin/oidc-login-test@v1
+      id: login
+      with:
+        user: lparezanin
+        source: https://dev.nugettest.org/api/v2/package
+        token-service-url: https://dev.nugettest.org/api/v2/token
+
+    - name: Push package
+      run: |
+        dotnet nuget push ./src/*.nupkg \
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+          --source https://dev.nugettest.org/api/v2/package
