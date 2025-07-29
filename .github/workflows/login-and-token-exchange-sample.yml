@@ -20,6 +20,7 @@ jobs:
       with:
         user: lparezanin
         source: https://dev.nugettest.org/api/v2/package
+        audience: https://dev.nugettest.org
         token-service-url: https://dev.nugettest.org/api/v2/token
 
     - name: Push package
