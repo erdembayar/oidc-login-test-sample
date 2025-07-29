@@ -14,15 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: NuGet Login
-      uses: Lanaparezanin/oidc-login-test@v3
-      id: login
-      with:
-        user: lparezanin
-        source: https://dev.nugettest.org/api/v2/package
-        audience: https://dev.nugettest.org
-        token-service-url: https://dev.nugettest.org/api/v2/token
-
     - name: Get GitHub OIDC Token
       id: get-token
       run: |
@@ -36,6 +27,44 @@ jobs:
       id: exchange-token
       run: |
         echo "🔁 Exchanging OIDC token for NuGet API key..."
+
+        BODY=$(jq -n --arg username "lparezanin" --arg tokenType "ApiKey" \
+          '{username: $username, tokenType: $tokenType}')
+
+        echo "📦 Request body: $BODY"
+
+        API_KEY_RESPONSE=$(curl -s -X POST "https://dev.nugettest.org/api/v2/token" \
+          -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
+          -H "Content-Type: application/json" \
+          -H "Content-Length: $(echo -n "$BODY" | wc -c)" \
+          -d "$BODY")
+
+        echo "📝 Raw response: $API_KEY_RESPONSE"
+
+        if echo "$API_KEY_RESPONSE" | jq . > /dev/null 2>&1; then
+          API_KEY=$(echo "$API_KEY_RESPONSE" | jq -r '.apiKey')
+          if [ -z "$API_KEY" ] || [ "$API_KEY" == "null" ]; then
+            echo "❌ Failed to extract API key from response"
+            exit 1
+          else
+            echo "✅ Successfully extracted API key"
+            echo "::add-mask::$API_KEY"
+            echo "NUGET_API_KEY=$API_KEY" >> $GITHUB_OUTPUT
+          fi
+        else
+           echo "❌ Invalid JSON returned from token service"
+          echo "$API_KEY_RESPONSE"
+          exit 1
+        fi
+        
+    - name: NuGet Login
+      uses: Lanaparezanin/oidc-login-test@v3
+      id: login
+      with:
+        user: lparezanin
+        source: https://dev.nugettest.org/api/v2/package
+        audience: https://dev.nugettest.org
+        token-service-url: https://dev.nugettest.org/api/v2/token
 
 
     - name: Push package
