@@ -23,6 +23,21 @@ jobs:
         audience: https://dev.nugettest.org
         token-service-url: https://dev.nugettest.org/api/v2/token
 
+    - name: Get GitHub OIDC Token
+      id: get-token
+      run: |
+        echo "🔐 Getting OIDC token..."
+        TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://dev.nugettest.org" | jq -r '.value')
+        echo "::add-mask::$TOKEN"
+        echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+    - name: Exchange OIDC token for NuGet API key
+      id: exchange-token
+      run: |
+        echo "🔁 Exchanging OIDC token for NuGet API key..."
+
+
     - name: Push package
       run: |
         dotnet nuget push ./src/*.nupkg \
