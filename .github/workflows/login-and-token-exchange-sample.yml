@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: NuGet Login
-      uses: Lanaparezanin/oidc-login-test@v1
+      uses: Lanaparezanin/oidc-login-test@v2
       id: login
       with:
         user: lparezanin
