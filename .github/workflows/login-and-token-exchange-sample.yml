@@ -56,6 +56,9 @@ jobs:
           echo "$API_KEY_RESPONSE"
           exit 1
         fi
+
+    - name: Push NuGet package
+      run: dotnet nuget push ./src/*.nupkg --api-key "${{ steps.exchange-token.outputs.NUGET_API_KEY }}" --source https://dev.nugettest.org/api/v2/package
         
     - name: NuGet Login
       uses: Lanaparezanin/oidc-login-test@v3
