@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v4
         
     - name: NuGet Login
-      uses: Lanaparezanin/nuget-login-preview@v6
+      uses: Lanaparezanin/nuget-login-preview@v7
       id: login
       with:
         user: lparezanin
