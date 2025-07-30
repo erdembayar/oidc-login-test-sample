@@ -13,30 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-
-    - name: Get GitHub OIDC Token
-      id: get-token
-      run: |
-        echo "🔐 Getting OIDC token..."
-        TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://dev.nugettest.org" | jq -r '.value')
-        echo "::add-mask::$TOKEN"
-        echo "token=$TOKEN" >> $GITHUB_OUTPUT
-    - name: Exchange OIDC token for NuGet API key
-      id: exchange-token
-      run: |
-        echo "🔁 Exchanging OIDC token for NuGet API key..."
-        BODY=$(jq -n --arg username "lparezanin" --arg tokenType "ApiKey" \
-          '{username: $username, tokenType: $tokenType}')
-        echo "📦 Request body: $BODY"
-        echo "📦 Request headers: "
-        API_KEY_RESPONSE=$(curl -s -X POST "https://dev.nugettest.org/api/v2/token" \
-          -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
-          -H "Content-Type: application/json" \
-          -H "Content-Length: $(echo -n "$BODY" | wc -c)" \
-          -d "$BODY")
-        echo "📝 Raw response: $API_KEY_RESPONSE"
-
         
     - name: NuGet Login
       uses: Lanaparezanin/nuget-login-preview@v16
