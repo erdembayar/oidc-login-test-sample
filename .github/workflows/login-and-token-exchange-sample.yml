@@ -39,7 +39,7 @@ jobs:
 
         
     - name: NuGet Login
-      uses: Lanaparezanin/nuget-login-preview@v11
+      uses: Lanaparezanin/nuget-login-preview@v12
       id: login
       with:
         user: lparezanin
